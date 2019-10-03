@@ -26,7 +26,7 @@ from model import RN
 
 import pdb
 
-def train(data, model, optimizer, epoch, args):
+def train(data, model, optimizer, scheduler, epoch, args):
     model.train()
 
     avg_loss = 0.0
@@ -46,7 +46,10 @@ def train(data, model, optimizer, epoch, args):
             clip_grad_norm(model.parameters(), args.clip_norm)
 
         optimizer.step()
-
+        
+        if((args.lr_max > 0 and scheduler.get_lr()[0]<args.lr_max) or args.lr_max < 0):
+            scheduler.step()
+            
         # Show progress
         progress_bar.set_postfix(dict(loss=loss.data))
         avg_loss += loss.data
@@ -346,14 +349,14 @@ def main(args):
                 #scheduler = lr_scheduler.CosineAnnealingLR(optimizer, step, min_lr)
                 print('Dataset reinitialized with batch size {}'.format(bs))
             
-            if((args.lr_max > 0 and scheduler.get_lr()[0]<args.lr_max) or args.lr_max < 0):
-                scheduler.step()
+#             if((args.lr_max > 0 and scheduler.get_lr()[0]<args.lr_max) or args.lr_max < 0):
+#                 scheduler.step()
                     
             print('Current learning rate: {}'.format(optimizer.param_groups[0]['lr']))
                 
             # TRAIN
             progress_bar.set_description('TRAIN')
-            train(clevr_train_loader, model, optimizer, epoch, args)
+            train(clevr_train_loader, model, optimizer, scheduler, epoch, args)
 
             # TEST
             progress_bar.set_description('TEST')
