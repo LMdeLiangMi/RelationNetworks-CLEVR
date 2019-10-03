@@ -112,7 +112,7 @@ def collate_samples(batch, state_description, only_images):
         collated_batch = dict(
             image=torch.stack(images),
             answer=torch.stack(answers),
-            question=torch.stack(padded_questions)
+            question=torch.stack(list(padded_questions))
         )
     return collated_batch
 
